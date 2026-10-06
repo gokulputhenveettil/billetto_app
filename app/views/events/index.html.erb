@@ -40,9 +40,9 @@
               </p>
             <% end %>
 
-            <% if event.event_url.present? %>
+            <% if (safe_event_url = safe_billetto_event_url(event.event_url)) %>
               <%= link_to "View Event",
-                  event.event_url,
+                  safe_event_url,
                   target: "_blank",
                   rel: "noopener noreferrer" %>
             <% end %>
