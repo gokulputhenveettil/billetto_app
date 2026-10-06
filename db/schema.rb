@@ -10,8 +10,33 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 0) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_135719) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "events", force: :cascade do |t|
+    t.string "billetto_id"
+    t.string "title"
+    t.text "description"
+    t.string "image_url"
+    t.string "event_url"
+    t.datetime "starts_at"
+    t.datetime "ends_at"
+    t.string "organiser_name"
+    t.string "location_name"
+    t.string "address"
+    t.string "city"
+    t.string "postal_code"
+    t.string "country"
+    t.string "country_code"
+    t.string "category"
+    t.string "subcategory"
+    t.boolean "available"
+    t.text "raw_data"
+    t.datetime "last_synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["billetto_id"], name: "index_events_on_billetto_id", unique: true
+    t.index ["starts_at"], name: "index_events_on_starts_at"
+  end
 end

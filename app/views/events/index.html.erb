@@ -1,0 +1,54 @@
+<div class="events-container">
+  <h1>Upcoming Events</h1>
+
+  <% if @events.empty? %>
+    <p>No upcoming events found.</p>
+  <% else %>
+    <div class="events-grid">
+      <% @events.each do |event| %>
+        <article class="event-card">
+          <% if event.image_url.present? %>
+            <%= image_tag event.image_url,
+                alt: event.title,
+                class: "event-image" %>
+          <% end %>
+
+          <div class="event-content">
+            <h2>
+              <%= event.title %>
+            </h2>
+
+            <p class="event-date">
+              <%= event.starts_at.strftime("%d %B %Y, %I:%M %p") %>
+            </p>
+
+            <% if event.location_name.present? %>
+              <p class="event-location">
+                <%= event.location_name %>
+                <% if event.city.present? %>
+                  · <%= event.city %>
+                <% end %>
+              </p>
+            <% end %>
+
+            <% if event.description.present? %>
+              <p>
+                <%= truncate(
+                  strip_tags(event.description),
+                  length: 180
+                ) %>
+              </p>
+            <% end %>
+
+            <% if (safe_event_url = safe_billetto_event_url(event.event_url)) %>
+              <%= link_to "View Event",
+                  safe_event_url,
+                  target: "_blank",
+                  rel: "noopener noreferrer" %>
+            <% end %>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% end %>
+</div>
