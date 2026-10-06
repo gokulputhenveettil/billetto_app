@@ -34,7 +34,7 @@ module Billetto
     private
 
     attr_reader :client
-    
+
     def import_event(data)
       validate_event_data!(data)
 

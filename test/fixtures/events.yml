@@ -1,7 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  billetto_id: MyString
+  billetto_id: fixture-event-one
   title: MyString
   description: MyText
   image_url: MyString
@@ -22,7 +22,7 @@ one:
   last_synced_at: 2026-10-06 13:57:19
 
 two:
-  billetto_id: MyString
+  billetto_id: fixture-event-two
   title: MyString
   description: MyText
   image_url: MyString
