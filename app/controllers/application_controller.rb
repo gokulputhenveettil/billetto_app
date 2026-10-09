@@ -1,7 +1,20 @@
+# app/controllers/application_controller.rb
 class ApplicationController < ActionController::Base
-  # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-  allow_browser versions: :modern
+  include Clerk::Authenticatable
 
-  # Changes to the importmap will invalidate the etag for HTML responses
-  stale_when_importmap_changes
+  helper_method :current_user, :user_signed_in?
+
+  private
+
+  def current_user
+    clerk.user # or clerk.session['sub']
+  end
+
+  def user_signed_in?
+    clerk.session.present?
+  end
+
+  def require_authentication!
+    redirect_to root_path, alert: "Please sign in to vote." unless user_signed_in?
+  end
 end
