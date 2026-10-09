@@ -36,36 +36,12 @@
   <body>
     <header class="navbar">
       <div class="brand"><%= link_to "Billetto Events", root_path %></div>
-      <div id="clerk-auth-container"></div>
+      <%= render "shared/clerk_auth" %>
     </header>
 
-    <% if flash[:alert] %>
-      <div class="flash-alert"><%= flash[:alert] %></div>
-    <% end %>
+    <%= render "shared/flash_messages" %>
     <%= yield %>
-    <script>
-      window.addEventListener("load", async () => {
-        await window.Clerk.load();
 
-        const authContainer = document.getElementById("clerk-auth-container");
-
-        if (window.Clerk.user) {
-          // Render the Clerk User Profile / Sign Out button
-          authContainer.innerHTML = `
-          <span class="user-greeting">Hi, ${window.Clerk.user.firstName || "User"}</span>
-          <button class="btn-auth" id="sign-out-btn">Sign Out</button>
-        `;
-        document.getElementById("sign-out-btn").onclick = () => window.Clerk.signOut();
-        } else {
-          // Render Sign In / Sign Up triggers
-          authContainer.innerHTML = `
-            <button class="btn-auth" id="sign-in-btn">Sign In</button>
-            <button class="btn-auth" id="sign-up-btn">Sign Up</button>
-          `;
-          document.getElementById("sign-in-btn").onclick = () => window.Clerk.redirectToSignIn();
-          document.getElementById("sign-up-btn").onclick = () => window.Clerk.redirectToSignUp();
-        }
-      });
-    </script>
+    <%= render "shared/clerk_auth_script" %>
   </body>
 </html>

@@ -4,6 +4,10 @@
 :scheduler:
   :schedule:
     import_billetto_events:
-      cron: "0 12 * * * Europe/Copenhagen"
+      cron: "0 12 * * * Asia/Kolkata"
       class: Billetto::ImportEventsJob
+      queue: default
+    delete_old_billetto_events:
+      cron: "0 2 * * * Asia/Kolkata"
+      class: Billetto::DeleteOldEventsJob
       queue: default

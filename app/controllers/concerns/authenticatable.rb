@@ -15,7 +15,7 @@ module Authenticatable
 
     # Verify session JWT using Clerk's SDK / JWKS endpoint
     claims = Clerk::SDK.new.sessions.verify_token(token)
-    
+
     # Clerk stores user identifier in the "sub" claim
     @current_user = OpenStruct.new(
       id: claims["sub"],

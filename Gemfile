@@ -46,6 +46,8 @@ gem "image_processing", "~> 1.2"
 
 gem "clerk-sdk-ruby", require: "clerk"
 
+gem "rails_event_store"
+
 group :development, :test do
   gem "dotenv-rails"
 
@@ -65,6 +67,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+  gem 'bullet'
 end
 
 group :test do
