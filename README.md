@@ -39,7 +39,7 @@ uses the Ruby version from `.ruby-version`.
    docker run -d --name billetto_sidekiq --env-file .env billetto_app bundle exec sidekiq -C config/sidekiq.yml
    ```
 
-   Sidekiq imports Billetto events every day at 12:00 Europe/Copenhagen time.
+   Sidekiq imports Billetto events every day at 12:00 Asia/Kolkata time and cleans up stale events older than 30 days at 02:00 Asia/Kolkata time.
 5. View logs or stop the containers:
 
    ```powershell

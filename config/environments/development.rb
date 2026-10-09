@@ -21,6 +21,10 @@ Rails.application.configure do
     local_secret_path.read.strip
   end
 
+  config.to_prepare do
+    Rails.configuration.event_store = RailsEventStore::Client.new
+    # add subscribers here
+  end
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 

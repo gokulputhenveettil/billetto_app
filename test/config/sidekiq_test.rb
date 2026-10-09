@@ -4,7 +4,7 @@ require "yaml"
 require "fugit"
 
 class SidekiqConfigTest < ActiveSupport::TestCase
-  test "schedules the Billetto importer every day at noon in Copenhagen" do
+  test "schedules the Billetto importer every day at noon in Asia/Kolkata" do
     config_path = Rails.root.join("config/sidekiq.yml")
     config = YAML.safe_load(
       ERB.new(config_path.read).result,
@@ -15,7 +15,22 @@ class SidekiqConfigTest < ActiveSupport::TestCase
     cron = Fugit.parse_cron(schedule.fetch("cron"))
 
     assert_equal "Billetto::ImportEventsJob", schedule.fetch("class")
-    assert_equal "Europe/Copenhagen", cron.zone
+    assert_equal "Asia/Kolkata", cron.zone
     assert_equal [ 12, 0 ], [ cron.hours.first, cron.minutes.first ]
+  end
+
+  test "schedules stale-event cleanup every day at 02:00 in Asia/Kolkata" do
+    config_path = Rails.root.join("config/sidekiq.yml")
+    config = YAML.safe_load(
+      ERB.new(config_path.read).result,
+      permitted_classes: [ Symbol ],
+      aliases: true
+    )
+    schedule = config.fetch(:scheduler).fetch(:schedule).fetch("delete_old_billetto_events")
+    cron = Fugit.parse_cron(schedule.fetch("cron"))
+
+    assert_equal "Billetto::DeleteOldEventsJob", schedule.fetch("class")
+    assert_equal "Asia/Kolkata", cron.zone
+    assert_equal [ 2, 0 ], [ cron.hours.first, cron.minutes.first ]
   end
 end

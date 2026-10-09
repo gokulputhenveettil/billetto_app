@@ -1,0 +1,24 @@
+<script>
+  window.addEventListener("load", async () => {
+    await window.Clerk.load();
+
+    const authContainer = document.getElementById("clerk-auth-container");
+
+    if (!authContainer) return;
+
+    if (window.Clerk.user) {
+      authContainer.innerHTML = `
+        <span class="user-greeting">Hi, ${window.Clerk.user.firstName || "User"}</span>
+        <button class="btn-auth" id="sign-out-btn">Sign Out</button>
+      `;
+      document.getElementById("sign-out-btn").onclick = () => window.Clerk.signOut();
+    } else {
+      authContainer.innerHTML = `
+        <button class="btn-auth" id="sign-in-btn">Sign In</button>
+        <button class="btn-auth" id="sign-up-btn">Sign Up</button>
+      `;
+      document.getElementById("sign-in-btn").onclick = () => window.Clerk.redirectToSignIn();
+      document.getElementById("sign-up-btn").onclick = () => window.Clerk.redirectToSignUp();
+    }
+  });
+</script>

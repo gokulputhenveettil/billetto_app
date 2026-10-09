@@ -1,0 +1,54 @@
+<article class="event-card <%= 'event-card--past' if event.starts_at.present? && event.starts_at < Time.current %>">
+  <% if event.image_url.present? %>
+    <%= image_tag event.image_url, alt: event.title, class: "event-image" %>
+  <% end %>
+
+  <div class="event-content">
+    <h2><%= event.title %></h2>
+
+    <% if event.starts_at.present? && event.starts_at < Time.current %>
+      <p class="event-status event-status--past">Past event</p>
+    <% end %>
+
+    <p class="event-date">
+      <%= event.starts_at.strftime("%d %B %Y, %I:%M %p") %>
+    </p>
+
+    <% if event.location_name.present? %>
+      <p class="event-location">
+        <%= event.location_name %>
+        <% if event.city.present? %>
+          · <%= event.city %>
+        <% end %>
+      </p>
+    <% end %>
+
+    <% if event.description.present? %>
+      <p><%= truncate(strip_tags(event.description), length: 180) %></p>
+    <% end %>
+
+    <div class="vote-stats">
+      <span class="badge upvotes">Likes: <%= event.upvotes_count %></span>
+      <span class="badge downvotes">Dislikes: <%= event.downvotes_count %></span>
+      <% if user_signed_in? %>
+        <span class="badge total">Total Votes: <%= event.total_votes %></span>
+        <span class="badge net">Score: <%= event.net_score %></span>
+      <% end %>
+    </div>
+
+    <div class="vote-buttons">
+      <% if user_signed_in? %>
+        <%= button_to "👍 Like", event_votes_path(event, type: "upvote"), method: :post, class: "btn-vote" %>
+        <%= button_to "👎 Dislike", event_votes_path(event, type: "downvote"), method: :post, class: "btn-vote" %>
+      <% else %>
+        <button onclick="window.Clerk.openSignIn()" class="btn-vote disabled">
+          Sign in to vote
+        </button>
+      <% end %>
+    </div>
+
+    <% if (safe_event_url = safe_billetto_event_url(event.event_url)) %>
+      <%= link_to "View Event", safe_event_url, target: "_blank", rel: "noopener noreferrer" %>
+    <% end %>
+  </div>
+</article>

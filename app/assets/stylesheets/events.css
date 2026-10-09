@@ -17,6 +17,28 @@
   background: #fff;
 }
 
+.event-card--past {
+  opacity: 0.65;
+  filter: grayscale(0.2);
+  background: #f9fafb;
+}
+
+.event-status {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.event-status--past {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
 .event-image {
   width: 100%;
   height: 200px;
@@ -37,4 +59,132 @@
 
 .event-location {
   color: #666;
+}
+
+/* --- Stats Badges Row --- */
+.vote-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  align-items: center;
+}
+
+.vote-stats .badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  line-height: 1.25;
+  border: 1px solid transparent;
+}
+
+.vote-stats .badge.upvotes {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.vote-stats .badge.downvotes {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.vote-stats .badge.total {
+  background-color: #f3f4f6;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+.vote-stats .badge.net {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+/* --- Action Controls --- */
+.vote-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Handles Rails button_to (which renders an inline form) */
+.vote-buttons form {
+  display: inline-block;
+  margin: 0;
+}
+
+.btn-vote {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-vote:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.btn-vote:active {
+  transform: translateY(0);
+  background-color: #f3f4f6;
+}
+
+/* Unauthenticated State */
+.btn-vote.disabled {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.btn-vote.disabled:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  color: #4b5563;
+  transform: none;
+}
+
+/* --- External Event Link --- */
+a[target="_blank"][rel*="noopener"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+}
+
+a[target="_blank"][rel*="noopener"]:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* External Link arrow icon */
+a[target="_blank"][rel*="noopener"]::after {
+  content: "↗";
+  font-size: 0.85em;
+  display: inline-block;
+  line-height: 1;
 }
