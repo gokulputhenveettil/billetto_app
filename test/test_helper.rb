@@ -11,5 +11,13 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+    def with_billetto_importer(importer)
+      original_new = Billetto::EventImporter.method(:new)
+      Billetto::EventImporter.define_singleton_method(:new) { importer }
+
+      yield
+    ensure
+      Billetto::EventImporter.define_singleton_method(:new, original_new)
+    end
   end
 end

@@ -56,7 +56,7 @@ module Billetto
           country_code: data.dig("location", "country_code"),
           category: data.dig("categorization", "category"),
           subcategory: data.dig("categorization", "subcategory"),
-          available: data["availability"] == "available",
+          available: data["availability"] == true,
           raw_data: data.to_json,
           last_synced_at: Time.current,
           updated_at: Time.current
@@ -86,7 +86,7 @@ module Billetto
     end
 
     def default_client
-      api_keypair = Rails.application.credentials.billetto[:api_keypair]
+      api_keypair = ENV["BILLETTO_API_KEYPAIR"]
       raise "Billetto API keypair is not configured" if api_keypair.blank?
 
       Billetto::Client.new(api_keypair: api_keypair)
