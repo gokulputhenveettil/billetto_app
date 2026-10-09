@@ -30,8 +30,10 @@
     <div class="vote-stats">
       <span class="badge upvotes">Likes: <%= event.upvotes_count %></span>
       <span class="badge downvotes">Dislikes: <%= event.downvotes_count %></span>
-      <span class="badge total">Total Votes: <%= event.total_votes %></span>
-      <span class="badge net">Score: <%= event.net_score %></span>
+      <% if user_signed_in? %>
+        <span class="badge total">Total Votes: <%= event.total_votes %></span>
+        <span class="badge net">Score: <%= event.net_score %></span>
+      <% end %>
     </div>
 
     <div class="vote-buttons">
