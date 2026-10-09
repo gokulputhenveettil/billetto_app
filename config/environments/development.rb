@@ -3,6 +3,24 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  config.credentials.content_path = Rails.root.join("config/credentials/development.yml.enc")
+  config.credentials.key_path = Rails.root.join("config/credentials/development.key")
+
+  config.secret_key_base = ENV["SECRET_KEY_BASE"] || begin
+    local_secret_path = Rails.root.join("tmp/local_secret.txt")
+    FileUtils.mkdir_p(local_secret_path.dirname)
+
+    begin
+      File.open(local_secret_path, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |file|
+        file.write(SecureRandom.hex(64))
+      end
+    rescue Errno::EEXIST
+      # Another local Rails process created the development secret first.
+    end
+
+    local_secret_path.read.strip
+  end
+
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
 
