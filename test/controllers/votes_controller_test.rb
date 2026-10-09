@@ -7,6 +7,8 @@ class VotesControllerTest < ActionDispatch::IntegrationTest
     @event_store = Object.new
     published = @published
 
+    @event_store.define_singleton_method(:with_request_metadata) { |_env, &block| block.call }
+
     @event_store.define_singleton_method(:publish) do |event, stream_name:|
       published[:event] = event
       published[:stream_name] = stream_name
@@ -21,56 +23,75 @@ class VotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "redirects unauthenticated users" do
-    VotesController.any_instance.stubs(:user_signed_in?).returns(false)
+    with_vote_authentication(signed_in: false) do
+      post event_votes_path(@event, type: "upvote")
 
-    post event_votes_path(@event, type: "upvote")
-
-    assert_redirected_to root_path
-    assert_equal "Please sign in to vote.", flash[:alert]
-    assert_nil @published[:event]
+      assert_redirected_to root_path
+      assert_equal "Please sign in to vote.", flash[:alert]
+      assert_nil @published[:event]
+    end
   end
 
   test "publishes an upvote event for authenticated users" do
     user = OpenStruct.new(id: "user-123")
-    VotesController.any_instance.stubs(:current_user).returns(user)
-    VotesController.any_instance.stubs(:user_signed_in?).returns(true)
 
-    post event_votes_path(@event, type: "upvote")
+    with_vote_authentication(signed_in: true, user: user) do
+      post event_votes_path(@event, type: "upvote")
 
-    assert_redirected_to root_path
-    assert_equal "Vote recorded successfully.", flash[:notice]
-    assert_instance_of EventUpvoted, @published[:event]
-    assert_equal "Event$#{@event.id}", @published[:stream_name]
-    assert_equal @event.id, @published[:event].data[:event_id]
-    assert_equal user.id, @published[:event].data[:user_id]
-    assert_equal "User$user-123", @published[:linked_stream_name]
-    assert_equal @published[:event].event_id, @published[:linked_event_id]
+      assert_redirected_to root_path
+      assert_equal "Vote recorded successfully.", flash[:notice]
+      assert_instance_of EventUpvoted, @published[:event]
+      assert_equal "Event$#{@event.id}", @published[:stream_name]
+      assert_equal @event.id, @published[:event].data[:event_id]
+      assert_equal user.id, @published[:event].data[:user_id]
+      assert_equal "User$user-123", @published[:linked_stream_name]
+      assert_equal @published[:event].event_id, @published[:linked_event_id]
+    end
   end
 
   test "rejects invalid vote types" do
-    VotesController.any_instance.stubs(:current_user).returns(OpenStruct.new(id: "user-123"))
-    VotesController.any_instance.stubs(:user_signed_in?).returns(true)
+    user = OpenStruct.new(id: "user-123")
 
-    post event_votes_path(@event, type: "bogus")
+    with_vote_authentication(signed_in: true, user: user) do
+      post event_votes_path(@event, type: "bogus")
 
-    assert_redirected_to root_path
-    assert_equal "Invalid vote type.", flash[:alert]
-    assert_nil @published[:event]
+      assert_redirected_to root_path
+      assert_equal "Invalid vote type.", flash[:alert]
+      assert_nil @published[:event]
+    end
   end
 
   test "publishes a downvote event for authenticated users" do
     user = OpenStruct.new(id: "user-456")
-    VotesController.any_instance.stubs(:current_user).returns(user)
-    VotesController.any_instance.stubs(:user_signed_in?).returns(true)
 
-    post event_votes_path(@event, type: "downvote")
+    with_vote_authentication(signed_in: true, user: user) do
+      post event_votes_path(@event, type: "downvote")
 
-    assert_redirected_to root_path
-    assert_equal "Vote recorded successfully.", flash[:notice]
-    assert_instance_of EventDownvoted, @published[:event]
-    assert_equal "Event$#{@event.id}", @published[:stream_name]
-    assert_equal @event.id, @published[:event].data[:event_id]
-    assert_equal user.id, @published[:event].data[:user_id]
-    assert_equal "User$user-456", @published[:linked_stream_name]
+      assert_redirected_to root_path
+      assert_equal "Vote recorded successfully.", flash[:notice]
+      assert_instance_of EventDownvoted, @published[:event]
+      assert_equal "Event$#{@event.id}", @published[:stream_name]
+      assert_equal @event.id, @published[:event].data[:event_id]
+      assert_equal user.id, @published[:event].data[:user_id]
+      assert_equal "User$user-456", @published[:linked_stream_name]
+    end
+  end
+
+  private
+
+  def with_vote_authentication(signed_in:, user: nil)
+    controller = VotesController
+    original_current_user = controller.instance_method(:current_user)
+    original_user_signed_in = controller.instance_method(:user_signed_in?)
+
+    controller.define_method(:current_user) { user }
+    controller.define_method(:user_signed_in?) { signed_in }
+    controller.send(:private, :current_user, :user_signed_in?)
+
+    yield
+  ensure
+    controller.define_method(:current_user, original_current_user)
+    controller.define_method(:user_signed_in?, original_user_signed_in)
+    controller.send(:private, :current_user, :user_signed_in?)
   end
 end

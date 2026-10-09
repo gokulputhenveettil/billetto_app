@@ -9,23 +9,23 @@ class Billetto::EventImporterTest < ActiveSupport::TestCase
       @requests = []
     end
 
-    test "builds its API client from the Billetto API key environment variable" do
-      with_billetto_api_keypair("test-api-keypair") do
-        assert_instance_of Billetto::Client, Billetto::EventImporter.new.instance_variable_get(:@client)
-      end
-    end
-
-    test "raises a clear error when the Billetto API key is not configured" do
-      with_billetto_api_keypair(nil) do
-        error = assert_raises(RuntimeError) { Billetto::EventImporter.new }
-
-        assert_equal "Billetto API keypair is not configured", error.message
-      end
-    end
-
     def fetch_events(**options)
       @requests << options
       @responses.shift
+    end
+  end
+
+  test "builds its API client from the Billetto API key environment variable" do
+    with_billetto_api_keypair("test-api-keypair") do
+      assert_instance_of Billetto::Client, Billetto::EventImporter.new.instance_variable_get(:@client)
+    end
+  end
+
+  test "raises a clear error when the Billetto API key is not configured" do
+    with_billetto_api_keypair(nil) do
+      error = assert_raises(RuntimeError) { Billetto::EventImporter.new }
+
+      assert_equal "Billetto API keypair is not configured", error.message
     end
   end
 
