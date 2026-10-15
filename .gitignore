@@ -43,3 +43,7 @@
 /node_modules/
 /.bundle/
 /vendor/bundle/
+
+
+VOTING_DESIGN.md
+VOTING_ARCHITECTURE.md
