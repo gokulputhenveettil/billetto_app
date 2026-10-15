@@ -44,8 +44,10 @@ class VotesControllerTest < ActionDispatch::IntegrationTest
       assert_equal "Event$#{@event.id}", @published[:stream_name]
       assert_equal @event.id, @published[:event].data[:event_id]
       assert_equal user.id, @published[:event].data[:user_id]
+      assert_nil @published[:event].data[:previous_vote_type]
       assert_equal "User$user-123", @published[:linked_stream_name]
       assert_equal @published[:event].event_id, @published[:linked_event_id]
+      assert_equal "upvote", Vote.find_by!(event: @event, user_id: user.id).vote_type
     end
   end
 
@@ -74,6 +76,20 @@ class VotesControllerTest < ActionDispatch::IntegrationTest
       assert_equal @event.id, @published[:event].data[:event_id]
       assert_equal user.id, @published[:event].data[:user_id]
       assert_equal "User$user-456", @published[:linked_stream_name]
+      assert_equal "downvote", Vote.find_by!(event: @event, user_id: user.id).vote_type
+    end
+  end
+
+  test "updates the existing vote when a user changes their vote" do
+    user = OpenStruct.new(id: "user-123")
+    Vote.create!(event: @event, user_id: user.id, vote_type: "upvote")
+
+    with_vote_authentication(signed_in: true, user: user) do
+      post event_votes_path(@event, type: "downvote")
+
+      assert_equal "upvote", @published[:event].data[:previous_vote_type]
+      assert_equal "downvote", Vote.find_by!(event: @event, user_id: user.id).vote_type
+      assert_equal 1, Vote.where(event: @event, user_id: user.id).count
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_115255) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_214653) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -68,5 +68,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_115255) do
     t.index ["starts_at"], name: "index_events_on_starts_at"
   end
 
+  create_table "votes", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.string "user_id", null: false
+    t.string "vote_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "user_id"], name: "index_votes_on_event_id_and_user_id", unique: true
+    t.index ["event_id"], name: "index_votes_on_event_id"
+    t.check_constraint "vote_type::text = ANY (ARRAY['upvote'::character varying, 'downvote'::character varying]::text[])", name: "votes_vote_type_check"
+  end
+
   add_foreign_key "event_store_events_in_streams", "event_store_events", column: "event_id", primary_key: "event_id"
+  add_foreign_key "votes", "events"
 end
