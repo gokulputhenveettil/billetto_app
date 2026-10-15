@@ -10,6 +10,26 @@
   gap: 24px;
 }
 
+.events-pagination {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0;
+}
+
+.events-load-more {
+  padding: 0.65rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  color: #374151;
+  background: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.events-load-more:hover {
+  background: #f9fafb;
+}
+
 .event-card {
   overflow: hidden;
   border: 1px solid #ddd;

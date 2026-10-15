@@ -1,4 +1,8 @@
 <article class="event-card <%= 'event-card--past' if event.starts_at.present? && event.starts_at < Time.current %>">
+  <% if (current_vote_type = local_assigns[:current_vote_type]) %>
+    <p class="event-user-vote">Your vote: <%= current_vote_type == "upvote" ? "Liked" : "Disliked" %></p>
+  <% end %>
+
   <% if event.image_url.present? %>
     <%= image_tag event.image_url, alt: event.title, class: "event-image" %>
   <% end %>
@@ -36,8 +40,12 @@
       <% end %>
     </div>
 
+    <% voting_closed = event.starts_at.present? && event.starts_at <= Time.current %>
     <div class="vote-buttons">
-      <% if user_signed_in? %>
+      <% if voting_closed %>
+        <%= button_to "👍 Like", event_votes_path(event, type: "upvote"), method: :post, class: "btn-vote disabled", disabled: true %>
+        <%= button_to "👎 Dislike", event_votes_path(event, type: "downvote"), method: :post, class: "btn-vote disabled", disabled: true %>
+      <% elsif user_signed_in? %>
         <%= button_to "👍 Like", event_votes_path(event, type: "upvote"), method: :post, class: "btn-vote" %>
         <%= button_to "👎 Dislike", event_votes_path(event, type: "downvote"), method: :post, class: "btn-vote" %>
       <% else %>
