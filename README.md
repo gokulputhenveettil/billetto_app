@@ -112,9 +112,11 @@ if the import fails. The importer can also be run through the Sidekiq job.
 
 ### Events and imports
 
-- `GET /` and `GET /events` show events ordered by start time. Past events
-  remain visible but are visually marked as past.
+- `GET /` and `GET /events` show events newest-first in pages of 20. Scrolling
+  loads additional events automatically, with a "Load more events" link as a
+  fallback. Past events remain visible but are visually marked as past.
 - `GET /events/:id` shows an event's details.
+- `GET /my-votes` lists the signed-in user's upvoted and downvoted events.
 - `POST /events/:event_id/votes` records a vote for an event.
 - Billetto event data is stored in PostgreSQL in the `events` table. A unique
   index on `billetto_id` supports idempotent imports.
@@ -127,11 +129,12 @@ Clerk handles browser sign-in and server-side session verification. The vote
 endpoint requires an authenticated user and accepts `type=upvote` or
 `type=downvote`; any other type is rejected.
 
-Votes are represented by `EventUpvoted` and `EventDownvoted` domain events in
-Rails Event Store. Each vote is published to the event stream
-(`Event$<event-id>`) and linked to the user's audit stream
-(`User$<clerk-user-id>`). `VoteCounterProjector` increments the corresponding
-`upvotes_count` or `downvotes_count` column on the event record.
+Votes are handled by the `Voting::CastVote` command through the command bus.
+`Voting::Service` stores the user's current vote and publishes a schema-checked
+`EventUpvoted` or `EventDownvoted` fact to Rails Event Store. Facts define their
+event and user stream names; `VoteCounterProjector` maintains event counts from
+the current vote records and can rebuild them from an event stream with
+`bin/rails votes:rebuild`.
 
 ### Background jobs and schedules
 

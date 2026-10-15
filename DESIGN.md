@@ -7,7 +7,7 @@ decisions. Setup instructions and environment variables are documented in
 ## Goals
 
 - Import and persist public Billetto event information.
-- Present events in start-time order, including past events with a visual
+- Present events newest-first by start time, including past events with a visual
   indication that they have passed.
 - Allow authenticated users to cast upvotes and downvotes.
 - Retain an event history for votes and maintain fast-to-read vote totals.
@@ -36,14 +36,17 @@ backend. Clerk provides user identity and browser sign-in.
 
 | Component | Responsibility |
 | --- | --- |
-| `EventsController` and event views | List events ordered by `starts_at` and display event details |
+| `EventsController` and event views | List events newest-first with scroll-loaded pagination and display event details |
 | `Billetto::Client` | Make paginated API requests using the Billetto API keypair |
 | `Billetto::EventImporter` | Validate API event data and upsert the local event read model |
 | `Billetto::ImportEventsJob` | Invoke the importer from Sidekiq |
 | `Billetto::DeleteOldEventsJob` | Remove event rows more than 30 days past their start time |
-| `VotesController` | Require a signed-in user and publish valid vote events |
+| `VotesController` | Require a signed-in user and dispatch valid vote commands |
+| `MyVotesController` | List the signed-in user's current voted events |
+| `Voting::Service` | Persist current votes and publish schema-checked domain facts |
+| `Voting::CommandBus` | Wrap command execution in a transaction, instrumentation, and event causality metadata |
 | Rails Event Store | Persist vote domain events and their event/user stream links |
-| `VoteCounterProjector` | Update denormalized vote counts on event rows |
+| `VoteCounterProjector` | Update denormalized vote counts and rebuild current-vote state from event streams |
 | Clerk | Provide the browser sign-in experience and server-side identity integration |
 
 ## Data model and persistence
@@ -66,15 +69,16 @@ cleanup, rather than the list query, eventually removes old records.
 
 ### Vote event store
 
-Votes are stored as immutable `EventUpvoted` or `EventDownvoted` domain events
-in Rails Event Store's PostgreSQL tables. Each vote is published to the
-`Event$<event-id>` stream and linked into the `User$<clerk-user-id>` stream.
-The event stream represents activity associated with an event, while the user
-stream provides an audit trail of a user's votes.
+Each user's current vote is stored in the `votes` table, with a unique
+`(event_id, user_id)` index. Changes are handled by `Voting::Service`, which
+publishes immutable, schema-checked `EventUpvoted` or `EventDownvoted` facts
+through Rails Event Store. Each fact defines its event stream and user audit
+stream.
 
-The `events` table also acts as a read model: `VoteCounterProjector` increments
-the relevant count when it receives a vote event. This keeps list rendering
-simple and avoids replaying the event stream for every page request.
+The `events` table is a read model for vote totals. `VoteCounterProjector`
+reconciles counts from current vote records, making duplicate event delivery
+idempotent. `bin/rails votes:rebuild` reconstructs current vote records and
+counts by replaying each event's stream.
 
 ## Request and data flows
 
@@ -93,7 +97,8 @@ simple and avoids replaying the event stream for every page request.
 
 ### Viewing events
 
-1. `GET /` and `GET /events` query the event table ordered by `starts_at`.
+1. `GET /` and `GET /events` query the event table ordered by `starts_at`
+   descending, with event ID as a deterministic tie-breaker.
 2. Each event uses the shared event-card partial for its display.
 3. An event whose `starts_at` is earlier than the current application time is
    marked as past. The event remains available in the list until cleanup
@@ -106,12 +111,10 @@ simple and avoids replaying the event stream for every page request.
    `type=downvote`.
 2. The controller requires an authenticated Clerk user, finds the target event,
    and rejects any other vote type.
-3. It creates the corresponding domain event with the event ID, Clerk user ID,
-   and vote timestamp.
-4. Rails Event Store publishes the event on the event stream and links it to
-   the user's stream.
-5. The registered `VoteCounterProjector` updates the event's denormalized
-   counter.
+3. It sends a `Voting::CastVote` command through the command bus.
+4. `Voting::Service` updates the current vote record and publishes the
+   corresponding domain fact on the event stream, linked to the user's stream.
+5. The registered projector reconciles the event's denormalized counters.
 
 ### Scheduled cleanup
 

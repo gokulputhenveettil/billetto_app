@@ -35,7 +35,16 @@
 
   <body>
     <header class="navbar">
-      <div class="brand"><%= link_to "Billetto Events", root_path %></div>
+      <div class="navbar-start">
+        <div class="brand"><%= link_to "Billetto Events", root_path %></div>
+        <% if user_signed_in? %>
+          <nav class="navbar-navigation" aria-label="Main navigation">
+            <%= link_to "My voted events", my_votes_path,
+              class: "navbar-link#{' navbar-link--active' if controller_name == 'my_votes'}",
+              aria: { current: ("page" if controller_name == "my_votes") } %>
+          </nav>
+        <% end %>
+      </div>
       <%= render "shared/clerk_auth" %>
     </header>
 

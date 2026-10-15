@@ -1,0 +1,4 @@
+<% votes_by_event_id = local_assigns.fetch(:votes_by_event_id, {}) %>
+<% events.each do |event| %>
+  <%= render "events/event_card", event: event, current_vote_type: votes_by_event_id[event.id] %>
+<% end %>

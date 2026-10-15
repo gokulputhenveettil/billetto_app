@@ -5,13 +5,17 @@ class VotesController < ApplicationController
   def create
     return redirect_to root_path, alert: "Invalid vote type." unless valid_vote_type?
 
-    Rails.configuration.command_bus.call(
-      VoteCommand.new(
-        event_id: @event.id,
-        user_id: current_user.id,
-        vote_type: params[:type].to_s.downcase
+    begin
+      Rails.configuration.command_bus.call(
+        Voting::CastVote.new(
+          event_id: @event.id,
+          user_id: current_user.id,
+          vote_type: params[:type].to_s.downcase
+        )
       )
-    )
+    rescue Voting::EventClosed
+      return redirect_to root_path, alert: "Voting is closed for past events."
+    end
 
     respond_to do |format|
       format.turbo_stream

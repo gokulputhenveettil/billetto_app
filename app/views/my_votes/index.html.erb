@@ -1,0 +1,17 @@
+<div class="events-container">
+  <h1>Events You Voted On</h1>
+
+  <% if @events.empty? %>
+    <p>You haven't voted on any events yet.</p>
+  <% else %>
+    <div class="events-grid">
+      <%= render "events/event_cards", events: @events, votes_by_event_id: @votes_by_event_id %>
+    </div>
+  <% end %>
+
+  <% if @next_page %>
+    <div class="events-pagination">
+      <%= link_to "Load more events", my_votes_path(page: @next_page), class: "events-load-more", data: { events_load_more: true } %>
+    </div>
+  <% end %>
+</div>

@@ -1,15 +1,8 @@
-class EventDownvoted < RubyEventStore::Event
-  # Event triggered when a user downvotes an event.
-  #
-  # Attributes:
-  # - event_id: The ID of the event being downvoted.
-  # - user_id: The ID of the user who downvoted the event.
-  # - voted_at: The timestamp when the downvote occurred.
-  # Schema documentation:
-  # data: {
-  #   event_id: Integer,
-  #   user_id: String,
-  #   previous_vote_type: String or nil,
-  #   voted_at: String (ISO8601)
-  # }
+class EventDownvoted < Voting::Fact
+  SCHEMA = {
+    event_id: Integer,
+    user_id: String,
+    previous_vote_type: [ String, NilClass ],
+    voted_at: String
+  }.freeze
 end

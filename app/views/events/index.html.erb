@@ -5,7 +5,13 @@
     <p>No upcoming events found.</p>
   <% else %>
     <div class="events-grid">
-      <%= render partial: "event_card", collection: @events, as: :event %>
+      <%= render "event_cards", events: @events %>
+    </div>
+  <% end %>
+
+  <% if @next_page %>
+    <div class="events-pagination">
+      <%= link_to "Load more events", events_path(page: @next_page), class: "events-load-more", data: { events_load_more: true } %>
     </div>
   <% end %>
 </div>

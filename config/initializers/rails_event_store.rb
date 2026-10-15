@@ -3,6 +3,7 @@ require "ruby_event_store"
 require "ruby_event_store/active_record"
 require "json"
 require "aggregate_root"
+require_relative "../../lib/application_subscriptions"
 
 Rails.configuration.to_prepare do
   Rails.configuration.event_store = client = RailsEventStore::Client.new(
@@ -11,6 +12,7 @@ Rails.configuration.to_prepare do
     )
   )
 
-  # Register subscribers (Read Model Projectors)
-  client.subscribe(VoteCounterProjector.new, to: [ EventUpvoted, EventDownvoted ])
+  ApplicationSubscriptions.handlers.each do |handler, event_types|
+    client.subscribe(handler, to: event_types)
+  end
 end

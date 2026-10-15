@@ -15,5 +15,7 @@ Rails.application.routes.draw do
     resources :votes, only: [ :create ]
   end
 
+  get "my-votes", to: "my_votes#index", as: :my_votes
+
   root "events#index"
 end
